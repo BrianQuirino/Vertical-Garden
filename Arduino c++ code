@@ -1,4 +1,5 @@
 #include<LiquidCrystal.h>
+#include <Adafruit_LiquidCrystal.h>
 /*
 This code records the temperature through testing the mV put out by the sensor.
 It records in both Celcius and Fahrenheit. 
@@ -7,14 +8,16 @@ to 257 degrees F
 The Humidity is simulated by a potentiometer by being mapped into percentages
 */
 //This code under here will be the one for the Ph levels
+
+Adafruit_LiquidCrystal lcd_1(0);
 const int rs =13,en = 12,d4 =11,d5 =10,d6 =9,d7 =8;
 LiquidCrystal lcd(rs,en, d4,d5,d6,d7);
 int Contrast = 0;
 
-const int analogIn = A0;
+int sensorPin = 0; // I modified this from analogIn const of A0 to sensorPin int of 0.
 int humiditysensorOutput = 0;
 // Defining Variables
-int RawValue= 0;
+int reading= 0;
 double Voltage = 0;
 double tempC = 0;
 double tempF = 0;
@@ -34,18 +37,24 @@ void setup(){
 
 void loop(){
   
-  RawValue = analogRead(analogIn);
-  Voltage = (RawValue / 1023.0) * 5000; // 5000 to get millivots.
-  tempC = (Voltage-500) * 0.1; // 500 is the offset
-  tempF = (tempC * 1.8) + 32; // convert to F  
-  Serial.print("Raw Value = " );                  
-  Serial.print(RawValue);      
-  Serial.print("\n milli volts = ");
-  Serial.print(Voltage,0); //
+  reading = analogRead(sensorPin);
+   
+  Serial.print("\nRaw Value = " );                  
+  Serial.print(reading); 
+  
+  Voltage = reading * 5.0;
+  Voltage /= 1024.0; // to get volts.    
+  Serial.print("\n volts = ");
+  Serial.print(Voltage,0);
+  
+  tempC = (Voltage-0.5) * 100; // 500 is the offset  
   Serial.print("\n Temperature in C = ");
   Serial.print(tempC,1);
+  
+  tempF = (tempC * 9.0/5.0) + 32; // convert to F     
   Serial.print("\n Temperature in F = ");
   Serial.println(tempF,1);
+  
   humiditysensorOutput = analogRead(A1);
   Serial.print("Humidity: "); // Printing out Humidity Percentage
   Serial.print(map(humiditysensorOutput, 0, 1023, 10, 70));
