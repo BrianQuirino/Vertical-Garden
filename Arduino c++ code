@@ -1,95 +1,112 @@
-#include<LiquidCrystal.h>
-#include <Adafruit_LiquidCrystal.h>
-/*
-This code records the temperature through testing the mV put out by the sensor.
-It records in both Celcius and Fahrenheit. 
-It can only detect from -40 degrees C to 125 degrees C or -40 degrees F 
-to 257 degrees F
-The Humidity is simulated by a potentiometer by being mapped into percentages
-*/
-//This code under here will be the one for the Ph levels
+#include "DHTStable.h"
+#define sensorPower 7
+#define sensorPin A1
+#define mister_one 2
+#define mister_two 3
+#define mister_three 4
+#define mister_four 5
 
-Adafruit_LiquidCrystal lcd_1(0);
-const int rs =13,en = 12,d4 =11,d5 =10,d6 =9,d7 =8;
-LiquidCrystal lcd(rs,en, d4,d5,d6,d7);
-int Contrast = 0;
 
-int sensorPin = 0; // I modified this from analogIn const of A0 to sensorPin int of 0.
-int humiditysensorOutput = 0;
-// Defining Variables
-int reading= 0;
-double Voltage = 0;
-double tempC = 0;
-double tempF = 0;
 
-void setup(){  
-  Serial.begin(9600);
-  pinMode(A1, INPUT);
+
+// Value for storing water level
+int val = 0;
+DHTStable DHT;
+
+#define DHT11_PIN       6
+
+
+void setup()
+{
+  Serial.begin(115200);
+
+  pinMode(mister_one,OUTPUT);
+  pinMode(mister_two,OUTPUT);
+  pinMode(mister_three,OUTPUT);
+  pinMode(mister_four,OUTPUT);
+
+  Serial.println(__FILE__);
+  Serial.print("LIBRARY VERSION: ");
+  Serial.println(DHTSTABLE_LIB_VERSION);
+  Serial.println();
+  Serial.println("Type,\tstatus,\tHumidity (%),\tTemperature (C)");
+
+  // Set D7 as an OUTPUT
+  pinMode(sensorPower, OUTPUT);
   
-  // this code is for the ph level
-  Serial.begin(9600);
-  analogWrite (6,Contrast);
-  lcd.begin(16,2);
-  lcd.setCursor(4,0);
-  lcd.print("pH Value:");
-  // end of the code - gorge
+  // Set to LOW so no power flows through the sensor
+  digitalWrite(sensorPower, LOW);
+  
+
 }
 
-void loop(){
+
+void loop()
+{
+
+  //get the reading from the function below and print it
+  int level = readSensor();
   
-  reading = analogRead(sensorPin);
-   
-  Serial.print("\nRaw Value = " );                  
-  Serial.print(reading); 
+  Serial.print("Water level: ");
+  Serial.println(level);
   
-  Voltage = reading * 5.0;
-  Voltage /= 1024.0; // to get volts.    
-  Serial.print("\n volts = ");
-  Serial.print(Voltage,0);
-  
-  tempC = (Voltage-0.5) * 100; // 500 is the offset  
-  Serial.print("\n Temperature in C = ");
-  Serial.print(tempC,1);
-  
-  tempF = (tempC * 9.0/5.0) + 32; // convert to F     
-  Serial.print("\n Temperature in F = ");
-  Serial.println(tempF,1);
-  
-  humiditysensorOutput = analogRead(A1);
-  Serial.print("Humidity: "); // Printing out Humidity Percentage
-  Serial.print(map(humiditysensorOutput, 0, 1023, 10, 70));
-  Serial.println("%");
+ int pHsensorvalue = analogRead(A0);
+  float pHvolt = pHsensorvalue*(5.0/1024);
+  float pH = -5.6*pHvolt + 21.188; //equation from datasheet
+  Serial.print("pH voltage | pH amount (below)");
+  Serial.print(pHvolt);
+  Serial.print(" | ");
+  Serial.println(pH);
+  delay(2000);
+
 
   
-  // code for the ph levels
- 	int sensorValue = analogRead(A0);
- 	float ph = sensorValue * (14.0/1023.0);
- 	Serial.println(ph);
- 	lcd.setCursor(6,1);
- 	lcd.print (ph);
-  //end of the code
-  
-  if ( tempF > 81)
+  // READ DATA
+  Serial.print("Hum, \t");
+  int chk = DHT.read11(DHT11_PIN);
+  switch (chk)
   {
-    Serial.print("Too high of temp\n");
-    //write code to make the fogger to stop
+    case DHTLIB_OK:  
+      Serial.print("Temp,\t"); 
+      break;
+    case DHTLIB_ERROR_CHECKSUM: 
+      Serial.print("Checksum error,\t"); 
+      break;
+    case DHTLIB_ERROR_TIMEOUT: 
+      Serial.print("Time out error,\t"); 
+      break;
+    default: 
+      Serial.print("Unknown error,\t"); 
+      break;
   }
-  else if (tempF < 50)
-  {
-    Serial.print("Too low of temp\n");
-    Serial.print(tempF);
-    //write code to make it warmer or sum
-  }
-  else if ( ph > 8)
-  {
-    Serial.print("Too high of ph level");
-    //write code to change the ph level to go back to adaquete amount
-  }
-  else if (ph < 4)
-  {
-    Serial.print("Too low of ph level");
-    //write code to increase the ph level to go back 
-  }
-  
-  delay(5000); //iterates every 10 seconds
+  // DISPLAY DATA
+  Serial.print(DHT.getHumidity(), 1);
+  Serial.print(",\t");
+  Serial.println(DHT.getTemperature(), 1);
+
+
+if(DHT.getHumidity() <80){
+  digitalWrite(mister_one,LOW);
+  digitalWrite(mister_two,LOW);
+  digitalWrite(mister_three,LOW);
+  digitalWrite(mister_four,LOW);  
+
+}else
+{
+  digitalWrite(mister_one,HIGH);
+  digitalWrite(mister_two,HIGH);
+  digitalWrite(mister_three,HIGH);
+  digitalWrite(mister_four,HIGH);
+}
+
+
+}
+
+//This is a function used to get the reading
+int readSensor() {
+  digitalWrite(sensorPower, HIGH);  // Turn the sensor ON
+  delay(10);              // wait 10 milliseconds
+  val = analogRead(sensorPin);    // Read the analog value form sensor
+  digitalWrite(sensorPower, LOW);   // Turn the sensor OFF
+  return val;             // send current reading
 }
