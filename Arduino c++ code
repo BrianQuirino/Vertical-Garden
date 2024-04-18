@@ -7,7 +7,9 @@
 #define mister_four 5
 #include<LiquidCrystal_I2C_Hangul.h>
 #include<Wire.h>
-
+#include <LiquidCrystal_I2C.h>
+//I2C pins declaration
+LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); 
 LiquidCrystal_I2C_Hangul lcd(0x3F,16,2); 
 
 
@@ -25,9 +27,8 @@ void setup()
 {
   Serial.begin(115200);
 
-  lcd.init();
-  lcd.backlight();
-  lcd.print("Hello World!");
+   lcd.begin(16,2);//Defining 16 columns and 2 rows of lcd display
+  lcd.backlight();//To Power ON the back light
 
   pinMode(mister_one,OUTPUT);
   pinMode(mister_two,OUTPUT);
@@ -62,8 +63,8 @@ void loop()
  int pHsensorvalue = analogRead(A0);
   float pHvolt = pHsensorvalue*(5.0/1024);
   float pH = -5.6*pHvolt + 21.188; //equation from datasheet
-  Serial.print("pH voltage | pH amount (below)");
-  Serial.print(pHvolt);
+  Serial.print("pH voltage | pH amount:"); 
+  Serial.print(pHvolt); // prints ph level
   Serial.print(" | ");
   Serial.println(pH);
   delay(2000);
@@ -107,6 +108,36 @@ if(DHT.getHumidity() <80){
   digitalWrite(mister_three,HIGH);
   digitalWrite(mister_four,HIGH);
 }
+
+lcd.setCursor(0,0); //Defining positon to write from first row,first column .
+lcd.print(" Temperature F "); //You can write 16 Characters per line .
+lcd.setCursor(0,1);  //Defining positon to write from second row,first column .
+lcd.print(DHT.getTemperature());
+delay(4000); 
+
+lcd.clear();//Clean the screen
+lcd.setCursor(0,0); 
+lcd.print(" Humidity ");
+lcd.setCursor(0,1);
+lcd.print(DHT.getHumidity());
+delay(4000); 
+
+lcd.clear();//Clean the screen
+lcd.setCursor(0,0); 
+lcd.print(" Water Level ");
+lcd.setCursor(0,1);
+lcd.print(level);
+delay(4000); 
+
+lcd.clear();//Clean the screen
+lcd.setCursor(0,0); 
+lcd.print(" Ph ");
+lcd.setCursor(0,1);
+lcd.print(pH);
+delay(4000); 
+}
+
+//Maybe here we can write a condtional statement
 
 
 }
