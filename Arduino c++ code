@@ -5,6 +5,11 @@
 #define mister_two 3
 #define mister_three 4
 #define mister_four 5
+#include<LiquidCrystal_I2C_Hangul.h>
+#include<Wire.h>
+
+LiquidCrystal_I2C_Hangul lcd(0x3F,16,2); 
+
 
 
 
@@ -19,6 +24,10 @@ DHTStable DHT;
 void setup()
 {
   Serial.begin(115200);
+
+  lcd.init();
+  lcd.backlight();
+  lcd.print("Hello World!");
 
   pinMode(mister_one,OUTPUT);
   pinMode(mister_two,OUTPUT);
