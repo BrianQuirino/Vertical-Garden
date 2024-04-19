@@ -137,9 +137,34 @@ delay(4000);
 }
 
 //Maybe here we can write a condtional statement
-
+/*
+String dataOutputs[] = {
+    "Water level: " + String(level),
+    "pH voltage: " + String(pHvolt),
+    "pH amount: " + String(pH),
+    "Temperature: " + String(DHT.getTemperature(), 1) + " C",
+    "Humidity: " + String(DHT.getHumidity(), 1) + " %",
 
 }
+*/
+/*
+lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print(dataOutputs[0]);
+  lcd.setCursor(0, 1);
+  lcd.print(dataOutputs[1]);
+  delay(2000); // Wait for 2 seconds
+
+  // Display the next three data outputs on the LCD
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print(dataOutputs[2]);
+  lcd.setCursor(0, 1);
+  lcd.print(dataOutputs[3]);
+  delay(2000); // Wait for 2 seconds
+*/
+
+
 
 //This is a function used to get the reading
 int readSensor() {
