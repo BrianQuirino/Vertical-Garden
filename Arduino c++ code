@@ -118,7 +118,7 @@ String dataOutputs[] = {
 }
 
 
-lcd.clear();
+  lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print(dataOutputs[0]);
   lcd.setCursor(0, 1);
@@ -133,6 +133,12 @@ lcd.clear();
   lcd.print(dataOutputs[3]);
   delay(2000); // Wait for 2 seconds
 
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print(dataOutputs[3);
+  lcd.setCursor(0, 1);
+  lcd.print(dataOutputs[4]);
+  delay(2000); // Wait for 2 seconds
 }
 
 
