@@ -1,3 +1,4 @@
+
 #include "DHTStable.h"
 #define sensorPower 7
 #define sensorPin A1
@@ -9,37 +10,39 @@
 #include <LiquidCrystal_I2C.h>
 //I2C pins declaration
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); 
-
-
-
-
+//idk what the POSITIVE
+/ POSITIVE is the polarity of the LCD, meaning the backlight is active HIGH
 
 // Value for storing water level
 int val = 0;
 DHTStable DHT;
 
-#define DHT11_PIN       6
+#define DHT11_PIN   6
 
 
 void setup()
 {
-  Serial.begin(115200);
+   Serial.begin(115200);
 
    lcd.begin(16,2);//Defining 16 columns and 2 rows of lcd display
-  lcd.backlight();//To Power ON the back light
+   lcd.backlight();//To Power ON the back light
 
+
+   // Set misters pins as OUTPUT
   pinMode(mister_one,OUTPUT);
   pinMode(mister_two,OUTPUT);
   pinMode(mister_three,OUTPUT);
   pinMode(mister_four,OUTPUT);
 
+
+   // Print file name and library version
   Serial.println(__FILE__);
   Serial.print("LIBRARY VERSION: ");
   Serial.println(DHTSTABLE_LIB_VERSION);
   Serial.println();
   Serial.println("Type,\tstatus,\tHumidity (%),\tTemperature (C)");
 
-  // Set D7 as an OUTPUT
+// Set sensor power pin as OUTPUT
   pinMode(sensorPower, OUTPUT);
   
   // Set to LOW so no power flows through the sensor
@@ -51,14 +54,14 @@ void setup()
 
 void loop()
 {
-
+// Read water level sensor
   //get the reading from the function below and print it
   int level = readSensor();
   
   Serial.print("Water level: ");
   Serial.println(level);
   
- int pHsensorvalue = analogRead(A0);
+  int pHsensorvalue = analogRead(A0);
   float pHvolt = pHsensorvalue*(5.0/1024);
   float pH = -5.6*pHvolt + 21.188; //equation from datasheet
   Serial.print("pH voltage | pH amount:"); 
@@ -68,8 +71,7 @@ void loop()
   delay(2000);
 
 
-  
-  // READ DATA
+  // Read DHT11 sensor data
   Serial.print("Hum, \t");
   int chk = DHT.read11(DHT11_PIN);
   switch (chk)
@@ -87,12 +89,12 @@ void loop()
       Serial.print("Unknown error,\t"); 
       break;
   }
-  // DISPLAY DATA
+   // Print humidity and temperature
   Serial.print(DHT.getHumidity(), 1);
   Serial.print(",\t");
   Serial.println(DHT.getTemperature(), 1);
 
-
+// Control misters based on humidity
 if(DHT.getHumidity() <80){
   digitalWrite(mister_one,LOW);
   digitalWrite(mister_two,LOW);
@@ -107,7 +109,7 @@ if(DHT.getHumidity() <80){
   digitalWrite(mister_four,HIGH);
 }
 
-
+// Prepare data for LCD display
 String dataOutputs[] = {
     "Water level: " + String(level),
     "pH voltage: " + String(pHvolt),
@@ -117,7 +119,7 @@ String dataOutputs[] = {
 
 }
 
-
+  // Display data on LCD
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print(dataOutputs[0]);
@@ -125,7 +127,7 @@ String dataOutputs[] = {
   lcd.print(dataOutputs[1]);
   delay(2000); // Wait for 2 seconds
 
-  // Display the next three data outputs on the LCD
+ // Display next set of data on LCD
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print(dataOutputs[2]);
@@ -133,6 +135,8 @@ String dataOutputs[] = {
   lcd.print(dataOutputs[3]);
   delay(2000); // Wait for 2 seconds
 
+
+// Display remaining data on LCD
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print(dataOutputs[3);
@@ -142,7 +146,7 @@ String dataOutputs[] = {
 }
 
 
-//This is a function used to get the reading
+// Function to read water level sensor
 int readSensor() {
   digitalWrite(sensorPower, HIGH);  // Turn the sensor ON
   delay(10);              // wait 10 milliseconds
@@ -150,3 +154,5 @@ int readSensor() {
   digitalWrite(sensorPower, LOW);   // Turn the sensor OFF
   return val;             // send current reading
 }
+
+
